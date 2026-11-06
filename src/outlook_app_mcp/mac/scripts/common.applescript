@@ -69,18 +69,21 @@ on addrText(e)
 			set nm to name of e
 		end try
 		try
-			set ad to address of e
+			set ad to «class radd» of e -- address
 		end try
 	end tell
 	return my clean(nm) & US & my clean(ad)
 end addrText
 
 -- The account whose email address is acct (case-insensitive).
+-- This file uses raw codes for Outlook's terms so it compiles without Outlook
+-- installed (CI); the scripts appended to it need Outlook's dictionary anyway.
 on findAccount(acct)
 	tell application "Microsoft Outlook"
-		set accts to (every exchange account) & (every imap account) & (every pop account)
+		-- exchange, imap and pop accounts
+		set accts to (every «class Eact») & (every «class iact») & (every «class pact»)
 		repeat with a in accts
-			if (email address of a) is acct then return contents of a
+			if («class emad» of a) is acct then return contents of a -- email address
 		end repeat
 	end tell
 	error "NO_ACCOUNT: no account with address " & acct number 9002
@@ -101,7 +104,7 @@ on tzName(e)
 	tell application "Microsoft Outlook"
 		try
 			-- Read the record first: "name of (timezone of e)" fails as one specifier.
-			set tzr to timezone of e
+			set tzr to «class rTmZ» of e -- timezone
 			set n to name of tzr
 		end try
 	end tell
@@ -118,13 +121,12 @@ on stampOrEmpty(d)
 	end try
 end stampOrEmpty
 
--- exchange, imap, pop or other.
+-- exchange, imap, pop or other. Raw class codes (exchange account, imap account,
+-- pop account), so this file compiles without Outlook's dictionary.
 on accountKind(a)
-	tell application "Microsoft Outlook"
-		set c to class of a
-		if c is exchange account then return "exchange"
-		if c is imap account then return "imap"
-		if c is pop account then return "pop"
-	end tell
+	tell application "Microsoft Outlook" to set c to class of a
+	if c is «class Eact» then return "exchange"
+	if c is «class iact» then return "imap"
+	if c is «class pact» then return "pop"
 	return "other"
 end accountKind
